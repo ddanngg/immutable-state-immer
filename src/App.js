@@ -1,14 +1,28 @@
-import React, { useReducer, useCallback } from "react";
-import { useImmer } from "use-immer";
+import React, { useState, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import Gift from "./components/gift";
 
-import { getInitialState, addBook, giftsReducer, getBookDetail } from "./helpers/gift";
+import {
+  getInitialState,
+  getBookDetail,
+  patchGeneratingGiftsReducer,
+} from "./helpers/gift";
 
 function App() {
-  const [state, dispatch] = useReducer(giftsReducer, getInitialState());
+  const [state, setState] = useState(() => getInitialState());
   const { users, currentUser, gifts } = state;
+
+  const dispatch = useCallback((action) => {
+    setState((currentState) => {
+      const [nextState, patches] = patchGeneratingGiftsReducer(
+        currentState,
+        action
+      );
+      console.log(patches);
+      return nextState;
+    });
+  }, []);
 
   const handleAdd = () => {
     const description = prompt("Gift to add");

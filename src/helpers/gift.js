@@ -1,9 +1,9 @@
-import produce from "immer";
+/* eslint-disable default-case */
+import produce, { produceWithPatches } from "immer";
 import { allUsers, getCurrentUser } from "../misc/users";
 import defaultGifts from "../misc/gifts.json";
 
-export const giftsReducer = produce((draft, action) => {
-  // eslint-disable-next-line default-case
+const giftsRecipe = (draft, action) => {
   switch (action.type) {
     case "ADD_GIFT":
       const { id, description, image } = action.payload;
@@ -36,7 +36,13 @@ export const giftsReducer = produce((draft, action) => {
     case "RESET":
       return getInitialState();
   }
-});
+};
+
+// (state, action) => state
+export const giftsReducer = produce(giftsRecipe);
+
+// (state, action) => [nextState, patches, reversePatches]
+export const patchGeneratingGiftsReducer = produceWithPatches(giftsRecipe);
 
 export function getInitialState() {
   return {
