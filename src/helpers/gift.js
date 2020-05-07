@@ -1,5 +1,5 @@
 /* eslint-disable default-case */
-import produce, { produceWithPatches } from "immer";
+import produce, { produceWithPatches, applyPatches } from "immer";
 import { allUsers, getCurrentUser } from "../misc/users";
 import defaultGifts from "../misc/gifts.json";
 
@@ -7,15 +7,15 @@ const giftsRecipe = (draft, action) => {
   switch (action.type) {
     case "ADD_GIFT":
       const { id, description, image } = action.payload;
-      draft.gifts.push({
+      draft.gifts[id] = {
         id,
         description,
         image,
         reservedBy: undefined,
-      });
+      };
       break;
     case "TOGGLE_RESERVATION":
-      const gift = draft.gifts.find((gift) => gift.id === action.payload.id);
+      const gift = draft.gifts[action.payload.id];
       if (!gift) return;
       gift.reservedBy =
         gift.reservedBy === undefined
@@ -26,15 +26,18 @@ const giftsRecipe = (draft, action) => {
       break;
     case "ADD_BOOK":
       const { book } = action.payload;
-      draft.gifts.push({
-        id: book.identifiers.isbn_10[0],
+      const isbn = book.identifiers.isbn_10[0];
+      draft.gifts[isbn] = {
+        id: isbn,
         description: book.title,
         image: book.cover.medium,
         reservedBy: undefined,
-      });
+      };
       break;
     case "RESET":
       return getInitialState();
+    case "APPLY_PATCHES":
+      return applyPatches(draft, action.payload.patches);
   }
 };
 

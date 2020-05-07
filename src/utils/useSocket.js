@@ -6,8 +6,6 @@ export function useSocket(url, onMsg) {
   msgHandler.current = onMsg;
 
   useEffect(() => {
-    console.log('useEffect url change');
-
     const createdSocket = new WebSocket(url);
 
     createdSocket.onmessage = (event) => {
@@ -25,6 +23,7 @@ export function useSocket(url, onMsg) {
   }, [url]);
 
   return useCallback((data) => {
+    console.log('data', data);
     socket.current.send(JSON.stringify(data));
   }, []);
 }

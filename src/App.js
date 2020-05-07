@@ -7,6 +7,7 @@ import {
   getInitialState,
   getBookDetail,
   patchGeneratingGiftsReducer,
+  giftsReducer,
 } from "./helpers/gift";
 import { useSocket } from "./utils/useSocket";
 
@@ -28,7 +29,9 @@ function App() {
 
   const send = useSocket("ws://localhost:5001", function onMsg(patches) {
     // we received some patches
-    console.dir(patches);
+    setState(() =>
+      giftsReducer(state, { type: "APPLY_PATCHES", payload: { patches } })
+    );
   });
 
   const handleAdd = () => {
@@ -87,7 +90,7 @@ function App() {
       </div>
 
       <div className="gifts">
-        {gifts.map((gift) => (
+        {Object.values(gifts).map((gift) => (
           <Gift
             key={gift.id}
             users={users}

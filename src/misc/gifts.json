@@ -1,19 +1,19 @@
-[
-  {
+{
+  "g1": {
     "id": "g1",
     "description": "Immer description",
     "image": "https://d2eip9sf3oo6c2.cloudfront.net/series/square_covers/000/000/157/square_480/EGH_GatsbyBlog.png",
     "reservedBy": 5
   },
-  {
+  "g2": {
     "id": "g2",
     "description": "Egghead.io subscription",
     "image": "https://d2eip9sf3oo6c2.cloudfront.net/series/square_covers/000/000/165/square_480/EGH_ReduxSaga.png",
     "reservedBy": 21
   },
-  {
+  "g3": {
     "id": "g3",
     "description": "The Complete Circle Series",
     "image": "https://d2eip9sf3oo6c2.cloudfront.net/series/square_covers/000/000/114/square_480/EGH_ReactRecompose_Final.png"
   }
-]
+}
