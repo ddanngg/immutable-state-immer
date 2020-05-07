@@ -1,13 +1,14 @@
 import React, { useState, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import Gift from "./components/gift";
+import Gift from "./components/gift-item";
 
 import {
   getInitialState,
   getBookDetail,
   patchGeneratingGiftsReducer,
 } from "./helpers/gift";
+import { useSocket } from "./utils/useSocket";
 
 function App() {
   const [state, setState] = useState(() => getInitialState());
@@ -19,10 +20,16 @@ function App() {
         currentState,
         action
       );
-      console.log(patches);
+      send(patches);
       return nextState;
     });
+    // eslint-disable-next-line
   }, []);
+
+  const send = useSocket("ws://localhost:5001", function onMsg(patches) {
+    // we received some patches
+    console.dir(patches);
+  });
 
   const handleAdd = () => {
     const description = prompt("Gift to add");
@@ -48,6 +55,7 @@ function App() {
         id,
       },
     });
+    // eslint-disable-next-line
   }, []);
 
   const handleReset = () => {
