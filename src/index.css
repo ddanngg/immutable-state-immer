@@ -5,9 +5,82 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #141618;
+  color: hsla(0,0%,100%,.8);
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.app {
+  width: 600px;
+  margin: auto;
+}
+
+.header {
+  height: 70px;
+}
+
+.header h2 {
+  font-size: 2em;
+  font-weight: 600;
+  text-align: center;
+}
+
+.actions {
+  height: 50px;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid;
+  border-left: none;
+  border-right: none;
+  margin-bottom: 10px;
+}
+
+.actions button {
+  height: 30px;
+  margin-right: 10px;
+  padding: 5px 15px;
+  border: 1px solid #fff;
+  background-image: none;
+  background-color: transparent;
+  color: #fff;
+}
+
+.gift {
+  display: flex;
+  max-height: 65px;
+  overflow: hidden;
+  margin: 20px 0;
+  box-sizing: border-box;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gift img {
+  width: 60px;
+  display: flex;
+  vertical-align: middle;
+  object-fit: fill;
+  background-position: center;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  color: black;
+}
+
+.gift .description {
+  font-size: 1.2em;
+  font-weight: 700;
+}
+
+.gift .reservation {
+  font-size: 2em;
+}
+
+.gift .reservation button {
+  height: 28px;
+  padding: 3px 7px;
+}
+
+.gift.reserved .description {
+  font-weight: 400;
+  font-style: italic;
+  text-decoration: line-through;
 }

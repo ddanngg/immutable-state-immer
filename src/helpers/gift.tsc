@@ -1,0 +1,180 @@
+import produce, { createDraft, finishDraft, Draft } from "immer";
+import { allUsers, getCurrentUser } from "../misc/users";
+import defaultGifts from "../misc/gifts.json";
+
+interface Gift {
+  readonly id: string;
+  readonly description: string;
+  readonly image: string;
+  readonly reservedBy?: number;
+}
+
+interface User {
+  readonly id: number;
+  readonly name: string;
+}
+
+export interface State {
+  readonly users: readonly User[];
+  readonly currentUser: User;
+  readonly gifts: readonly Gift[];
+}
+
+interface Book {
+  readonly identifiers: {
+    readonly isbn_10: string[];
+  };
+  readonly isbn: string;
+  readonly title: string;
+  readonly cover: {
+    readonly medium: string;
+  };
+}
+
+// -- currying
+// produce(recipe, x) => (state, x) => nextState
+export const addGift = produce(
+  (draft: Draft<State>, id: string, description: string, image: string) => {
+    draft.gifts.push({
+      id,
+      description,
+      image,
+      reservedBy: undefined,
+    });
+  }
+);
+
+// immer `original` is access to origin state
+export const toggleReservation = produce((draft: Draft<State>, giftId: string) => {
+  const gift = draft.gifts.find((gift) => gift.id === giftId);
+  if (!gift) return;
+  gift.reservedBy =
+    gift.reservedBy === undefined
+      ? draft.currentUser.id
+      : gift.reservedBy === draft.currentUser.id
+      ? // : gift.reservedBy === original(draft.currentUser).id
+        undefined
+      : gift.reservedBy;
+});
+
+
+// export function addGift(state, id, description, image) {
+//   return produce(state, (draft) => {
+//     draft.gifts.push({
+//       id,
+//       description,
+//       image,
+//       reservedBy: undefined,
+//     });
+//   });
+// }
+
+// -- USE `produce`
+// export function toggleReservation(state, giftId) {
+//   return produce(state, (draft) => {
+//     const gift = draft.gifts.find((gift) => gift.id === giftId);
+//     gift.reservedBy =
+//       gift.reservedBy === undefined
+//         ? state.currentUser.id
+//         : gift.reservedBy === state.currentUser.id
+//         ? undefined
+//         : gift.reservedBy;
+//   });
+// }
+
+// -- BASE
+// export function toggleReservation(state, giftId) {
+//   return {
+//     ...state,
+//     gifts: state.gifts.map((gift) => {
+//       if (gift.id !== giftId) return gift;
+//       return {
+//         ...gift,
+//         reservedBy:
+//           gift.reservedBy === undefined
+//             ? state.currentUser.id
+//             : gift.reservedBy === state.currentUser.id
+//             ? undefined
+//             : gift.reservedBy,
+//       };
+//     }),
+//   };
+// }
+
+export function getInitialState() {
+  return {
+    users: allUsers,
+    currentUser: getCurrentUser(),
+    gifts: defaultGifts,
+  };
+}
+
+// -------------------------------
+// ------------ ASYNC ------------
+// ----- `addBook`
+
+export async function getBookDetail(isbn: string): Promise<Book> {
+  const response = await fetch(
+    `http://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&jscmd=data&format=json`,
+    {
+      mode: "cors",
+    }
+  );
+  const book = (await response.json())["ISBN:" + isbn];
+  return book;
+}
+
+// - `immer` produce
+export const addBook = produce((draft: Draft<State>, book: Book) => {
+  draft.gifts.push({
+    id: book.identifiers.isbn_10[0],
+    description: book.title,
+    image: book.cover.medium,
+    reservedBy: undefined,
+  });
+});
+
+
+// - `immer` under the hood
+// export async function addBook(state, isbn) {
+//   const draft = createDraft(state);
+//   const response = await fetch(
+//     `http://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&jscmd=data&format=json`,
+//     {
+//       mode: "cors",
+//     }
+//   );
+//   const book = (await response.json())["ISBN:" + isbn];
+//   draft.gifts.push({
+//     id: isbn,
+//     description: book.title,
+//     image: book.cover.medium,
+//     reservedBy: undefined,
+//   });
+
+//   return finishDraft(draft);
+// }
+
+// - default
+// export async function addBook(state, isbn) {
+//   const response = await fetch(
+//     `http://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&jscmd=data&format=json`,
+//     {
+//       mode: "cors",
+//     }
+//   );
+//   const book = (await response.json())["ISBN:" + isbn];
+
+//   return {
+//     ...state,
+//     gifts: [
+//       ...state.gifts,
+//       {
+//         id: isbn,
+//         description: book.title,
+//         image: book.cover.medium,
+//         reservedBy: undefined,
+//       },
+//     ],
+//   };
+// }
