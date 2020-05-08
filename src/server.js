@@ -4,11 +4,9 @@ import gifts from "./misc/gifts.json";
 import { produceWithPatches, applyPatches, enablePatches } from "immer";
 
 enablePatches();
-
-const initialState = { gifts };
-
 const wss = new WebSocketServer({ port: 5001 });
 
+const initialState = { gifts };
 const connections = [];
 
 let history = [];

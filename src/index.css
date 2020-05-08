@@ -44,6 +44,10 @@ body {
   color: #fff;
 }
 
+button:disabled {
+  color: #797979;
+}
+
 .gift {
   display: flex;
   max-height: 65px;

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import Gift from "./components/gift-item";
@@ -13,14 +13,18 @@ import { useSocket } from "./utils/useSocket";
 
 function App() {
   const [state, setState] = useState(() => getInitialState());
+  const undoStack = useRef([]);
   const { users, currentUser, gifts } = state;
 
-  const dispatch = useCallback((action) => {
+  const dispatch = useCallback((action, undoable = true) => {
     setState((currentState) => {
-      const [nextState, patches] = patchGeneratingGiftsReducer(
+      const [nextState, patches, invertPatches] = patchGeneratingGiftsReducer(
         currentState,
         action
       );
+      if (undoable) {
+        undoStack.current.push(invertPatches);
+      }
       send(patches);
       return nextState;
     });
@@ -77,6 +81,15 @@ function App() {
     }
   };
 
+  const handleUndo = () => {
+    if (!undoStack.current.length) return;
+    const patches = undoStack.current.pop();
+    dispatch({
+      type: "APPLY_PATCHES",
+      payload: { patches },
+    }, false);
+  };
+
   return (
     <div className="app">
       <div className="header">
@@ -87,6 +100,9 @@ function App() {
         <button onClick={handleAdd}>Add</button>
         <button onClick={handleReset}>Reset</button>
         <button onClick={handleAddBook}>Add book</button>
+        <button onClick={handleUndo} disabled={!undoStack.current.length}>
+          Undo
+        </button>
       </div>
 
       <div className="gifts">
