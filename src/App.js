@@ -14,6 +14,7 @@ import { useSocket } from "./utils/useSocket";
 function App() {
   const [state, setState] = useState(() => getInitialState());
   const undoStack = useRef([]);
+  const undoStackPointer = useRef(-1);
   const { users, currentUser, gifts } = state;
 
   const dispatch = useCallback((action, undoable = true) => {
@@ -22,10 +23,13 @@ function App() {
         currentState,
         action
       );
-      if (undoable) {
-        undoStack.current.push(invertPatches);
-      }
       send(patches);
+      if (undoable) {
+        // undoStack.current.push(invertPatches);
+        const pointer = ++undoStackPointer.current;
+        undoStack.current.length = pointer;
+        undoStack.current[pointer] = { patches, invertPatches };
+      }
       return nextState;
     });
     // eslint-disable-next-line
@@ -82,13 +86,30 @@ function App() {
   };
 
   const handleUndo = () => {
-    if (!undoStack.current.length) return;
-    const patches = undoStack.current.pop();
-    dispatch({
-      type: "APPLY_PATCHES",
-      payload: { patches },
-    }, false);
+    if (undoStackPointer.current < 0) return;
+    const patches = undoStack.current[undoStackPointer.current].invertPatches;
+    undoStackPointer.current--;
+    dispatch(
+      {
+        type: "APPLY_PATCHES",
+        payload: { patches },
+      },
+      false
+    );
   };
+
+  const handleRedo = () => {
+    if (undoStackPointer.current === undoStack.current.length - 1) return;
+    undoStackPointer.current = undoStack.current.length++;
+    const patches = undoStack.current[undoStackPointer.current].patches;
+    dispatch(
+      {
+        type: "APPLY_PATCHES",
+        payload: { patches },
+      },
+      false
+    );
+  }
 
   return (
     <div className="app">
@@ -100,8 +121,14 @@ function App() {
         <button onClick={handleAdd}>Add</button>
         <button onClick={handleReset}>Reset</button>
         <button onClick={handleAddBook}>Add book</button>
-        <button onClick={handleUndo} disabled={!undoStack.current.length}>
+        <button onClick={handleUndo} disabled={undoStackPointer.current < 0}>
           Undo
+        </button>
+        <button
+          onClick={handleRedo}
+          disabled={undoStackPointer.current === undoStack.current.length - 1}
+        >
+          Redo
         </button>
       </div>
 
